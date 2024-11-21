@@ -94,7 +94,7 @@ export default function ZephyrSignupForm() {
           uilDivision: 'N/A',
         });
 
-        alert("Successfully signed up!");
+        alert("You're successfully signed up - please check your spam!");
       } catch (error) {
         console.error("Error:", error);
         alert("There was an error. Please try again.");
