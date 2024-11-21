@@ -4,6 +4,11 @@ import {
   useState,
 } from 'react';
 
+import {
+  addDoc,
+  collection,
+} from 'firebase/firestore';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { db } from '@/firebase/config';
 
 export default function ZephyrSignupForm() {
   const [formData, setFormData] = useState({
@@ -33,28 +39,68 @@ export default function ZephyrSignupForm() {
   }, [formData])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prevData => ({ ...prevData, [name]: value }))
+    const { name, value } = e.target;
+    if (name === 'phoneNumber') {
+      // Remove all non-numeric characters and format as E.164
+      const cleaned = value.replace(/\D/g, '');
+      const formatted = cleaned.startsWith('1') ? `+${cleaned}` : `+1${cleaned}`;
+      setFormData(prevData => ({ ...prevData, [name]: formatted }));
+    } else {
+      setFormData(prevData => ({ ...prevData, [name]: value }));
+    }
   }
 
   const handleUILDivisionChange = (value: string) => {
     setFormData(prevData => ({ ...prevData, uilDivision: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (isFormValid) {
-      console.log('Form submitted:', formData)
-      setFormData({
-        firstName: '',
-        lastName: '',
-        phoneNumber: '',
-        email: '',
-        school: '',
-        uilDivision: 'N/A',
-      })
+      try {
+        // Add timestamp to the data
+        const submissionData = {
+          ...formData,
+          timestamp: new Date(),
+        };
+
+        // Add document to Firestore
+        const docRef = await addDoc(collection(db, "users"), submissionData);
+
+        // Send email notification
+        const notifyResponse = await fetch('/api/notify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            firstName: formData.firstName,
+            school: formData.school,
+          }),
+        });
+
+        if (!notifyResponse.ok) {
+          throw new Error('Failed to send email notification');
+        }
+
+        // Clear form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          phoneNumber: '',
+          email: '',
+          school: '',
+          uilDivision: 'N/A',
+        });
+
+        alert("Successfully signed up!");
+      } catch (error) {
+        console.error("Error:", error);
+        alert("There was an error. Please try again.");
+      }
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -142,8 +188,8 @@ export default function ZephyrSignupForm() {
           <Button
             type="submit"
             className={`w-full ${isFormValid
-                ? "bg-[#4F7382] hover:bg-[#3A5A68] text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ? "bg-[#4F7382] hover:bg-[#3A5A68] text-white"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             disabled={!isFormValid}
           >
