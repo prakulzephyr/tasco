@@ -65,7 +65,7 @@ export default function ZephyrSignupForm() {
         };
 
         // Add document to Firestore
-        const docRef = await addDoc(collection(db, "users"), submissionData);
+        await addDoc(collection(db, "users"), submissionData);
 
         // Send email notification
         const notifyResponse = await fetch('/api/notify', {

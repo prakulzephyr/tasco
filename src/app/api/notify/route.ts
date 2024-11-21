@@ -7,7 +7,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 export async function POST(request: Request) {
     try {
-        const { email, firstName, lastName, school } = await request.json();
+        const { email, firstName } = await request.json();
 
         // Send email with proper authentication
         await sgMail.send({
