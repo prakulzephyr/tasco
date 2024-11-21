@@ -1,13 +1,10 @@
 'use client';
 
 import {
-    FirebaseApp,
+    getApps,
     initializeApp,
 } from 'firebase/app';
-import {
-    Firestore,
-    getFirestore,
-} from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,15 +16,11 @@ const firebaseConfig = {
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
-let app: FirebaseApp;
-let db: Firestore;
+// Debug log
+console.log('Firebase Config Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
 
-try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-} catch (error) {
-    console.error("Firebase initialization error:", error);
-}
+// Initialize Firebase
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const db = getFirestore(app);
 
 export { db };
