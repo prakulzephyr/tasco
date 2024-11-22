@@ -111,7 +111,7 @@ export default function ZephyrSignupForm() {
             alt="Zephyr Logo"
             className="h-16 mb-4"
           />
-          <h2 className="text-2xl font-bold text-center text-[#4F7382]">Sign Up for Zephyr</h2>
+          <h2 className="text-2xl font-bold text-center text-[#4F7382]">Sign Up for a Chat!</h2>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
